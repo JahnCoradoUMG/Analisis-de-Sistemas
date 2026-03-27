@@ -1,0 +1,308 @@
+openapi: 3.0.3
+info:
+  title: GymFlow API
+  version: 1.0.0
+  description: GymFlow API
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      responses:
+        '200':
+          description: API en linea
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /clients:
+    post:
+      tags: [clients]
+      summary: Crear cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientCreate'
+      responses:
+        '200':
+          description: Cliente creado (respuesta de exito generica)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '201':
+          description: Cliente creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /clients/{client_id}:
+    get:
+      tags: [clients]
+      summary: Obtener cliente por ID
+      parameters:
+        - name: client_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /memberships:
+    post:
+      tags: [memberships]
+      summary: Crear membresia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipCreate'
+      responses:
+        '200':
+          description: Membresia creada (respuesta de exito generica)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+        '201':
+          description: Membresia creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /payments:
+    post:
+      tags: [payments]
+      summary: Crear pago
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+      responses:
+        '200':
+          description: Pago creado (respuesta de exito generica)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '201':
+          description: Pago creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /check-in:
+    post:
+      tags: [check-in]
+      summary: Registrar check-in
+      description: Valida membresia activa y vigente antes de permitir el ingreso.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInCreate'
+      responses:
+        '200':
+          description: Check-in registrado (respuesta de exito generica)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckIn'
+        '201':
+          description: Check-in registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckIn'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    BadRequest:
+      description: Solicitud invalida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            generic:
+              value:
+                detail: Membership is not currently valid
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            generic:
+              value:
+                detail: Client not found
+  schemas:
+    MembershipStatus:
+      type: string
+      enum: [active, expired, cancelled]
+    PaymentMethod:
+      type: string
+      enum: [cash, card, transfer]
+    ClientCreate:
+      type: object
+      required: [full_name, email]
+      properties:
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 120
+          example: Carlos Mendez
+        email:
+          type: string
+          format: email
+          example: carlos.mendez@gymflow.test
+        phone:
+          type: string
+          minLength: 8
+          maxLength: 20
+          nullable: true
+          example: "5551234567"
+    Client:
+      allOf:
+        - $ref: '#/components/schemas/ClientCreate'
+        - type: object
+          required: [id, created_at]
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+    MembershipCreate:
+      type: object
+      required: [client_id, plan_name, start_date, end_date]
+      properties:
+        client_id:
+          type: string
+          example: 8ff43a40-0911-4352-97a0-94f16f6d4db2
+        plan_name:
+          type: string
+          minLength: 3
+          maxLength: 80
+          example: Plan Premium
+        start_date:
+          type: string
+          format: date-time
+          example: 2026-03-01T00:00:00Z
+        end_date:
+          type: string
+          format: date-time
+          example: 2026-12-31T23:59:59Z
+        status:
+          $ref: '#/components/schemas/MembershipStatus'
+    Membership:
+      allOf:
+        - $ref: '#/components/schemas/MembershipCreate'
+        - type: object
+          required: [id, created_at]
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+    PaymentCreate:
+      type: object
+      required: [client_id, membership_id, amount, method]
+      properties:
+        client_id:
+          type: string
+        membership_id:
+          type: string
+        amount:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+          example: 350.0
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        paid_at:
+          type: string
+          format: date-time
+          example: 2026-03-10T14:30:00Z
+    Payment:
+      allOf:
+        - $ref: '#/components/schemas/PaymentCreate'
+        - type: object
+          required: [id, created_at]
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+    CheckInCreate:
+      type: object
+      required: [client_id]
+      properties:
+        client_id:
+          type: string
+        checked_in_at:
+          type: string
+          format: date-time
+          example: 2026-03-15T08:00:00Z
+    CheckIn:
+      allOf:
+        - $ref: '#/components/schemas/CheckInCreate'
+        - type: object
+          required: [id, membership_id]
+          properties:
+            id:
+              type: string
+              format: uuid
+            membership_id:
+              type: string
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
