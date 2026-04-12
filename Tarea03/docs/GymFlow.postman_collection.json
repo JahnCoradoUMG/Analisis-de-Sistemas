@@ -1,0 +1,197 @@
+{
+  "info": {
+    "name": "GymFlow API - Pruebas",
+    "_postman_id": "2ec3e116-2181-4dd2-afca-1dfc6f5d54c8",
+    "description": "Coleccion de pruebas para GymFlow API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "clientId",
+      "value": ""
+    },
+    {
+      "key": "membershipId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Client",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const data = pm.response.json();",
+              "if (data.id) {",
+              "  pm.collectionVariables.set('clientId', data.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"Carlos Mendez\",\n  \"email\": \"carlos.mendez@gymflow.test\",\n  \"phone\": \"5551234567\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/clients",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "clients"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Client By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/clients/{{clientId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "clients",
+            "{{clientId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Membership",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const data = pm.response.json();",
+              "if (data.id) {",
+              "  pm.collectionVariables.set('membershipId', data.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"client_id\": \"{{clientId}}\",\n  \"plan_name\": \"Plan Premium\",\n  \"start_date\": \"2026-03-01T00:00:00Z\",\n  \"end_date\": \"2026-12-31T23:59:59Z\",\n  \"status\": \"active\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/memberships",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "memberships"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"client_id\": \"{{clientId}}\",\n  \"membership_id\": \"{{membershipId}}\",\n  \"amount\": 350.00,\n  \"method\": \"card\",\n  \"paid_at\": \"2026-03-10T14:30:00Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check-In (Membership Validacion)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"client_id\": \"{{clientId}}\",\n  \"checked_in_at\": \"2026-03-15T08:00:00Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/check-in",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "check-in"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
